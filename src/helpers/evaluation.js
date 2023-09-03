@@ -1,19 +1,24 @@
-import uuid from "react-uuid";
+import uuid from 'react-uuid';
 
 export const element = {
+  id: '',
+  description: '',
+  average: '',
+  quantity: '',
+  date: '',
+};
+
+export function getID() {
+  return uuid();
+}
+
+
+export function initialForm(){
+  return {
     id: uuid(),
     description: '',
     average: '',
     quantity: '',
-    date: '',
-  };
-
-export const initialFormFields = [
-    {
-      id: uuid(),
-      description: '',
-      average: '',
-      quantity: '',
-      elements: [element],
-    },
-  ];
+    elements: [element],
+  }
+}

@@ -1,11 +1,12 @@
 import { yupResolver } from '@hookform/resolvers/yup';import * as yup from 'yup';
 import { useForm } from 'react-hook-form';
-import { initialFormFields } from '../helpers/evaluation';
+import { initialForm } from '../helpers/evaluation';
 
 const EvaluationShema = () => {
   const schema = yup.object().shape({
     formFields: yup.array().of(
       yup.object().shape({
+        id: yup.string(),
         description: yup.string().required('Description is required'),
         average: yup
           .number()
@@ -15,13 +16,14 @@ const EvaluationShema = () => {
           .number()
           .typeError('Quantity must be a number')
           .required('Quantity is required'),
+        elements: yup.array(),
       })
     ),
   });
 
   const methods = useForm({
-    mode: 'onChange',
-    defaultValues: { formFields: initialFormFields },
+    // mode: 'onChange',
+    defaultValues: { formFields: initialForm },
     resolver: yupResolver(schema),
   });
 
