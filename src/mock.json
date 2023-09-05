@@ -1,0 +1,75 @@
+[
+    {
+        "id": "546642cd-cde2-645e-f979-1b7b83df79a3",
+        "field1": "1",
+        "field2": "1",
+        "field3": "1",
+        "subEntries": [
+            {
+                "id": "166d7910-a80e-184f-bc14-1d252c901d95",
+                "field1": "2",
+                "field2": "2",
+                "field3": "2",
+                "field4": "2"
+            },
+            {
+                "id": "85703007-35f2-f47b-add4-2968286a77c2",
+                "field1": "3",
+                "field2": "3",
+                "field3": "3",
+                "field4": "3"
+            },
+            {
+                "id": "c3459cdb-6d8e-c3c1-9c52-6094c09e9919",
+                "field1": "4",
+                "field2": "4",
+                "field3": "4",
+                "field4": "4"
+            }
+        ]
+    },
+    {
+        "id": "ae78f6a1-7d2e-4e09-8543-dce950ff899e",
+        "field1": "4",
+        "field2": "4",
+        "field3": "4",
+        "subEntries": []
+    },
+    {
+        "id": "b5408d6b-8a02-4b12-8a84-ebad4056a4c9",
+        "field1": "5",
+        "field2": "5",
+        "field3": "5",
+        "subEntries": [
+            {
+                "id": "f6217d3b-2d7e-46bf-9dca-e102a3c30b36",
+                "field1": "6",
+                "field2": "6",
+                "field3": "6",
+                "field4": "6"
+            }
+        ]
+    },
+    {
+        "id": "87b3a632-4990-4e4e-9b42-37c9c22f1a31",
+        "field1": "7",
+        "field2": "7",
+        "field3": "7",
+        "subEntries": []
+    },
+    {
+        "id": "c1b8b3e9-29b1-4ea2-9bca-335a76c7fbb9",
+        "field1": "8",
+        "field2": "8",
+        "field3": "8",
+        "subEntries": [
+            {
+                "id": "a5a9f71f-0c52-40cd-9770-8a6096ed33f0",
+                "field1": "9",
+                "field2": "9",
+                "field3": "9",
+                "field4": "9"
+            }
+        ]
+    }
+]

@@ -1,5 +1,4 @@
-/* eslint-disable react/prop-types */ import { useState } from 'react';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+/* eslint-disable react/prop-types */ import { useState } from 'react';import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import {
@@ -15,14 +14,31 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import uuid from 'react-uuid';
 import DeleteIcon from '@mui/icons-material/Delete';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import EvualuationForm from '../validations/EvualuationForm';
 
-const EvaluationTopicForm = ({ onSubmit }) => {
+const schema = yup.object().shape({
+  items: yup.array().of(
+    yup.object().shape({
+      description: yup.string().required('Campo requerido'),
+      average: yup
+        .number()
+        .typeError('Debe ser un número')
+        .required('Campo requerido'),
+      note: yup
+        .number()
+        .typeError('Debe ser un número')
+        .required('Campo requerido'),
+      date: yup
+        .number()
+        .typeError('Debe ser un número')
+        .required('Campo requerido'),
+    })
+  ),
+});
+
+const EvaluationForm = ({ initialEvaluationState, setTopicForm }) => {
   const [isTransition] = useState(true);
 
-  const evualuation = {
+  const initialValue = {
     id: uuid(),
     description: '',
     average: '',
@@ -30,41 +46,14 @@ const EvaluationTopicForm = ({ onSubmit }) => {
     date: '',
   };
 
-  const initialValue = {
-    id: uuid(),
-    description: '',
-    average: '',
-    quantity: '',
-    evualuation: [evualuation],
-  };
-
-  const schema = yup.object().shape({
-    items: yup.array().of(
-      yup.object().shape({
-        description: yup.string().required('Campo requerido'),
-        average: yup
-          .number()
-          .typeError('Debe ser un número')
-          .required('Campo requerido'),
-        quantity: yup
-          .number()
-          .typeError('Debe ser un número')
-          .required('Campo requerido'),
-      })
-    ),
-  });
-
   const {
     control,
     handleSubmit,
     formState: { errors },
     reset,
-    setValue,
   } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: {
-      items: [initialValue],
-    },
+    defaultValues: initialEvaluationState,
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -72,31 +61,26 @@ const EvaluationTopicForm = ({ onSubmit }) => {
     name: 'items',
   });
 
-  const [expandedRows, setExpandedRows] = useState(
-    Array(fields.length).fill(false)
-  );
-
-  const open = (index) => {
-    const updatedExpandedRows = [...expandedRows];
-    updatedExpandedRows[index] = !updatedExpandedRows[index];
-    setExpandedRows(updatedExpandedRows);
+  const onSubmit = (data) => {
+    setTopicForm('evualuation', data);
+    console.log(data);
   };
 
   return (
-    <>
+    <Box className="">
       <form onSubmit={handleSubmit(onSubmit)}>
         {fields.map((item, index) => (
           <Fade
             key={item.id}
             in={isTransition}
             style={{ transitionDelay: isTransition ? '200ms' : '100ms' }}>
-            <Box className="">
+            <Box>
               <Box
                 sx={{
                   boxShadow:
                     'rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;',
                 }}
-                className="bg-gray-100 rounded-lg p-4 flex flex-col w-full mb-3">
+                className=" bg-white rounded-lg p-4 flex flex-col w-full mb-3">
                 <Box className="flex flex-row">
                   <Controller
                     control={control}
@@ -114,6 +98,7 @@ const EvaluationTopicForm = ({ onSubmit }) => {
                       />
                     )}
                   />
+
                   <Controller
                     control={control}
                     name={`items[${index}].average`}
@@ -130,43 +115,39 @@ const EvaluationTopicForm = ({ onSubmit }) => {
                       />
                     )}
                   />
+
                   <Controller
                     control={control}
-                    name={`items[${index}].quantity`}
+                    name={`items[${index}].note`}
                     render={({ field }) => (
                       <TextField
                         {...field}
                         size={'small'}
                         variant="outlined"
-                        placeholder="Quantity"
-                        className="w-full  mb-2 px-2 "
+                        placeholder="note"
+                        className="w-full  mb-2 px-2"
                         style={{ padding: '4px' }}
-                        error={!!errors.items?.[index]?.quantity}
-                        helperText={errors.items?.[index]?.quantity?.message}
+                        error={!!errors.items?.[index]?.note}
+                        helperText={errors.items?.[index]?.note?.message}
                       />
                     )}
                   />
-
-                  <Box className="flex justify-center items-center px-1">
-                    <IconButton
-                      sx={{
-                        backgroundColor: '#f2f2f2',
-                        boxShadow:
-                          'rgba(9, 30, 66, 0.25) 0px 1px 1px, rgba(9, 30, 66, 0.13) 0px 0px 1px 1px;',
-                        '&:hover': {
-                          backgroundColor: '#e6f2ff',
-                        },
-                      }}
-                      color="info"
-                      onClick={() => open(index)}
-                      aria-label="expand">
-                      {expandedRows[index] ? (
-                        <ExpandLessIcon />
-                      ) : (
-                        <ExpandMoreIcon />
-                      )}
-                    </IconButton>
-                  </Box>
+                  <Controller
+                    control={control}
+                    name={`items[${index}].date`}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        size={'small'}
+                        variant="outlined"
+                        placeholder="date"
+                        className="w-full  mb-2 px-2"
+                        style={{ padding: '4px' }}
+                        error={!!errors.items?.[index]?.date}
+                        helperText={errors.items?.[index]?.average?.date}
+                      />
+                    )}
+                  />
 
                   <Box className="flex justify-center items-center px-1">
                     <IconButton
@@ -185,24 +166,17 @@ const EvaluationTopicForm = ({ onSubmit }) => {
                     </IconButton>
                   </Box>
                 </Box>
-                <Box>
-                  {expandedRows[index] && (
-                    <Box className="flex flex-col bg-gray-100 mt-2 p-2 w-full">
-                      <EvualuationForm
-                        initialEvaluationState={item.evualuation}
-                        setTopicForm={setValue}></EvualuationForm>
-                    </Box>
-                  )}
-                </Box>
               </Box>
             </Box>
           </Fade>
         ))}
 
+        <Divider sx={{ marginTop: '20px', marginBottom: '20px' }} />
+
         <Button
-          style={{ marginTop: '20px' }}
           variant="outlined"
-          color="primary"
+          color="secondary"
+          sx={{ marginRight: '10px' }}
           startIcon={<AddIcon />}
           onClick={() => {
             append(initialValue);
@@ -210,26 +184,25 @@ const EvaluationTopicForm = ({ onSubmit }) => {
           Nueva entrada
         </Button>
 
-        <Divider sx={{ marginTop: '20px', marginBottom: '20px' }} />
-
-        <Button
-          sx={{ marginRight: '10px' }}
-          type="submit"
-          variant="contained"
-          startIcon={<CloudUploadIcon />}>
-          Send
-        </Button>
-
         <Button
           type="button"
+          color="secondary"
           variant="outlined"
           startIcon={<RestartAltIcon />}
           onClick={() => reset()}>
           Reiniciar
         </Button>
+
+        <Button
+          sx={{ marginRight: '10px' }}
+          onClick={handleSubmit(onSubmit)}
+          variant="contained"
+          startIcon={<CloudUploadIcon />}>
+          Send
+        </Button>
       </form>
-    </>
+    </Box>
   );
 };
 
-export default EvaluationTopicForm;
+export default EvaluationForm;

@@ -2,17 +2,15 @@
 import mock from './mock.json';
 import { useEffect, useState } from 'react';
 import {
-  Alert,
   Box,
   Button,
   Container,
   Divider,
   IconButton,
   TextField,
-  Typography,
 } from '@mui/material';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { yupResolver } from '@hookform/resolvers/yup'; // Importa yupResolver
 import * as yup from 'yup';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -21,18 +19,13 @@ import AddIcon from '@mui/icons-material/Add';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import uuid from 'react-uuid';
-import MessageAlert from './components/MessageAlert';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import moment from 'moment';
 
 const defaultEntry = () => {
   return {
     id: uuid(),
     description: '',
     average: '',
-    quantity: 1,
+    quantity: '',
     subEntries: [defaultSubEntry()],
   };
 };
@@ -43,14 +36,12 @@ const defaultSubEntry = () => {
     description: '',
     average: '',
     score: '',
-    date: moment(),
+    date: '',
   };
 };
 
 function App() {
   const [expandedSections, setExpandedSections] = useState({});
-  const [openMessageAlert, setMessageAlert] = useState(false);
-  const [invalidEntries, setInvalidEntries] = useState([]);
 
   const schema = yup.object().shape({
     entries: yup.array().of(
@@ -60,9 +51,7 @@ function App() {
         quantity: yup.string().required('quantity es requerido'),
         subEntries: yup.array().of(
           yup.object().shape({
-            description: yup
-              .string()
-              .required('evaluation description requerido '),
+            description: yup.string().required('evaluation description requerido '),
             average: yup.string().required('evaluation avarage es requerido '),
             score: yup.string().required('score es requerido'),
             date: yup.string().required('date es requerido'),
@@ -71,16 +60,6 @@ function App() {
       })
     ),
   });
-
-  const handleAlert = (state) => {
-    setMessageAlert(state);
-  };
-
-  const handleCloseAlert = (index) => {
-    const newInvalidEntries = [...invalidEntries];
-    newInvalidEntries.splice(index, 1); // Elimina el índice de la entrada cerrada
-    setInvalidEntries(newInvalidEntries);
-  };
 
   const toggleSection = (id) => {
     setExpandedSections({ ...expandedSections, [id]: !expandedSections[id] });
@@ -96,7 +75,7 @@ function App() {
     mode: 'onChange',
     resolver: yupResolver(schema),
     defaultValues: {
-      entries: [defaultEntry()],
+      entries: [],
     },
   });
 
@@ -116,40 +95,28 @@ function App() {
   };
 
   const addSubEntry = (entryIndex) => {
+    const newSubEntry = defaultSubEntry();
     const currentEntries = getValues('entries');
-    const entry = currentEntries[entryIndex];
-    const totalSubEntriesAverage = entry.subEntries.reduce(
-      (total, subEntry) => total + parseFloat(subEntry.average),
-      0
-    );
+    currentEntries[entryIndex].subEntries.push(newSubEntry);
 
-    const entryAverage = parseFloat(entry.average);
+    // Hacer una copia del estado actual de expandedSections
+    const newExpandedSections = { ...expandedSections };
 
-    if (totalSubEntriesAverage > entryAverage) {
-      handleAlert(true);
-      setInvalidEntries([...invalidEntries, entryIndex]);
-    } else {
-      const newSubEntry = defaultSubEntry();
-      currentEntries[entryIndex].subEntries.push(newSubEntry);
+    // Actualizar el formulario con las nuevas subentradas
+    setValue('entries', currentEntries);
 
-      const newQuantity = entry.quantity + 1;
-      currentEntries[entryIndex].quantity = newQuantity;
-      const newExpandedSections = { ...expandedSections };
-
-      setValue('entries', currentEntries);
-
-      newExpandedSections[newSubEntry.id] = true;
-      setExpandedSections(newExpandedSections);
-    }
+    // Mantener abierto el estado de la nueva subentrada
+    newExpandedSections[newSubEntry.id] = true;
+    setExpandedSections(newExpandedSections);
   };
 
   const removeSubEntry = (entryIndex, subEntryIndex) => {
     const currentEntries = getValues('entries');
-    currentEntries[entryIndex].quantity = currentEntries[entryIndex].quantity - 1;
     const removedSubEntry = currentEntries[entryIndex].subEntries.splice(
       subEntryIndex,
       1
     );
+    // Elimina el estado solo de la subentrada que se eliminó
     const newExpandedSections = { ...expandedSections };
     setValue('entries', currentEntries);
     delete newExpandedSections[removedSubEntry[0].id];
@@ -158,7 +125,12 @@ function App() {
 
   const onSubmit = async (data) => {
     console.log(data.entries);
+    // Realiza el envío de datos o cualquier otra lógica aquí
   };
+
+  useEffect(() => {
+    console.log(fields);
+  }, [fields]);
 
   return (
     <Container className="py-8" maxWidth="lg">
@@ -168,16 +140,6 @@ function App() {
             <Box
               key={entries.id}
               className="bg-white rounded-lg shadow-md border-solid border-2 border-slate-100 p-4 flex flex-col w-full mb-3">
-              {invalidEntries.includes(index) && (
-                <MessageAlert
-                  handleAlert={handleAlert}
-                  open={true}
-                  message={
-                    '¡La suma de subEntries.average no puede superar la cantidad en entries.average!'
-                  }
-                  onClose={() => handleCloseAlert(index)}
-                />
-              )}
               <Box className="flex flex-row">
                 <Controller
                   name={`entries[${index}].description`}
@@ -186,7 +148,6 @@ function App() {
                   render={({ field }) => (
                     <TextField
                       {...field}
-                      label="Type Evaluation"
                       size="small"
                       placeholder="description"
                       variant="outlined"
@@ -205,7 +166,6 @@ function App() {
                   render={({ field }) => (
                     <TextField
                       {...field}
-                      label="Average"
                       size="small"
                       placeholder="average"
                       variant="outlined"
@@ -224,11 +184,10 @@ function App() {
                   render={({ field }) => (
                     <TextField
                       {...field}
-                      label="Quantity"
                       size="small"
                       placeholder="quantity"
                       variant="outlined"
-                      className="w-full mb-2 px-2 pointer-events-none"
+                      className="w-full mb-2 px-2"
                       style={{ padding: '4px' }}
                       error={!!errors.entries?.[index]?.quantity}
                       helperText={errors.entries?.[index]?.quantity?.message}
@@ -256,7 +215,6 @@ function App() {
                     )}
                   </IconButton>
                 </Box>
-                
 
                 <Box className="flex justify-center items-center px-1">
                   <IconButton
@@ -276,16 +234,13 @@ function App() {
                 </Box>
               </Box>
 
-              
-
-              {expandedSections && (
+              {expandedSections[entries.id] && (
                 <Box>
                   {entries.subEntries &&
                     entries.subEntries.map((subEntry, subIndex) => (
                       <Container key={subEntry.id} className="">
-                     
                         <Box
-                          className="flex flex-row  p-1 "
+                          className="flex flex-row  p-1 mt-2"
                           key={subEntry.id}>
                           <Controller
                             name={`entries[${index}].subEntries[${subIndex}].description`}
@@ -293,7 +248,6 @@ function App() {
                             defaultValue={subEntry.description}
                             render={({ field }) => (
                               <TextField
-                                label="Description"
                                 {...field}
                                 size="small"
                                 placeholder="description"
@@ -322,7 +276,6 @@ function App() {
                               <TextField
                                 {...field}
                                 size="small"
-                                label="Average"
                                 placeholder="average"
                                 variant="outlined"
                                 className="w-full mb-2 px-2"
@@ -349,7 +302,6 @@ function App() {
                               <TextField
                                 {...field}
                                 size="small"
-                                label="Score"
                                 placeholder="score"
                                 variant="outlined"
                                 className="w-full mb-2 px-2"
@@ -367,25 +319,32 @@ function App() {
                               />
                             )}
                           />
-                          <LocalizationProvider dateAdapter={AdapterMoment}>
-                            <Controller
-                              name={`entries[${index}].subEntries[${subIndex}].date`}
-                              control={control}
-                              defaultValue={subEntry.date}
-                              render={({ field: { onChange, value } }) => (
-                                <DatePicker
-                                  className="w-full mb-2 px-2"
-                                  slotProps={{ textField: { size: 'small' } }}
-                                  onChange={onChange}
-                                  sx={{
-                                    marginTop: '4px',
-                                  }}
-                                  required
-                                  label="Date"
-                                />
-                              )}
-                            />
-                          </LocalizationProvider>
+
+                          <Controller
+                            name={`entries[${index}].subEntries[${subIndex}].date`}
+                            control={control}
+                            defaultValue={subEntry.date}
+                            render={({ field }) => (
+                              <TextField
+                                {...field}
+                                size="small"
+                                placeholder="date"
+                                variant="outlined"
+                                className="w-full mb-2 px-2"
+                                style={{ padding: '4px' }}
+                                error={
+                                  !!errors.entries?.[index]?.subEntries?.[
+                                    subIndex
+                                  ]?.date
+                                }
+                                helperText={
+                                  errors.entries?.[index]?.subEntries?.[
+                                    subIndex
+                                  ]?.date?.message
+                                }
+                              />
+                            )}
+                          />
 
                           <Box className="flex justify-center items-center px-1">
                             <IconButton
@@ -414,7 +373,7 @@ function App() {
                       color="primary"
                       startIcon={<AddIcon />}
                       onClick={() => addSubEntry(index)}>
-                      Agregar Evaluación
+                      Agregar Subentrada
                     </Button>
                   </Container>
                 </Box>
